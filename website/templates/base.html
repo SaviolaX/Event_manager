@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{% block title %}{% endblock %}</title>
+
+	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+	<header>
+		<div class="navbar">
+			<ul class="navbar-menu">
+				<li><a href="{% url 'website:main_page' %}">Home</a></li>
+				{% if request.user.is_authenticated %}
+					<li><a href="{% url 'account:profile' user.profile.id %}">Profile</a></li>
+					<li><a href="{% url 'events:all_events' %}">All Events</a></li>
+					<li><a href="{% url 'account:all_profiles' %}">All Profiles</a></li>
+				{% endif %}
+			</ul>
+			<ul class="navbar-auth">
+				{% if request.user.is_authenticated %}
+						<li><a href="{% url 'account:profile' user.profile.id %}">{{ request.user.profile }}</a></li>
+						<li><a href="{% url 'account:logout' %}">Logout</a></li>
+				{% else %}
+					<li><a href="{% url 'account:login' %}">Login</a></li>
+					<li><a href="{% url 'account:register' %}">Registration</a></li>
+				{% endif %}
+			</ul>
+		</div>
+	</header>
+	<div class="container">
+		{% block content %}
+
+		{% endblock %}
+	</div>
+</body>
+</html>

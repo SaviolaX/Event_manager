@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user }}'s profile{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div style="display:inline">
+		<h2>Activity wall</h2>
+	</div>
+	</div>
+	<div class="profile">
+		<div class="profile-image">
+			{% if profile.photo %}
+				<img src="{{ profile.photo.url }}">
+			{% else %}
+				<img src="{% static 'images/no_img/no_img.png' %}">
+		{% endif %} 
+		</div>
+
+		<div class="profile-info">
+			<h3>{{ profile.user.username }}</h3>
+			<h4>{{ profile.user.first_name }} {{ profile.user.last_name }}</h4>
+			<h4>City: {{ profile.city }}</h4>
+			{% if profile == request.user.profile %}
+				<a style="padding-left: 10px;" href="{% url 'account:edit_profile' profile.id %}">Edit profile</a>
+			{% else %}
+			{% endif %}
+		</div>
+
+		<div class="profile-buttons">
+			{% if profile != request.user.profile %}
+
+				{% if profile in request.user.profile.friends.all %}
+					<a href="{% url 'account:delete' profile.id %}">Delete</a>
+				{% else %}
+
+					{% if profile == friend_invite.to_user %}
+						<a href="{% url 'account:cancel_sending_request' profile.id %}">Cancel request</a>
+					{% else %}
+						<a href="{% url 'account:send' profile.id %}">Add to friends</a>
+					{% endif %}
+
+				{% endif %}
+			
+			{% else %}
+				<a href="{% url 'events:create_event' %}">Create event</a>
+				<br>
+				<a href="{% url 'account:my_events' %}">My events: {{ profile.get_sum_created_events }}</a>
+				<br>
+			{% endif %}
+		</div>
+	
+
+			<div class="profile-friends">
+				<a class="head-link" href="{% url 'account:friends_list' profile.id %}">Friends: <span> {{ profile.get_sum_friends }}</span></a>
+				<br>		
+				{% for friend in friends %}
+				<div class="friend">
+					<a href="{% url 'account:profile' friend.id %}">
+						{% if friend.photo %}
+							<img src="{{ friend.photo.url }}" width="70" height="100">
+						{% else %}
+							<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+						{% endif %} 
+						<h4>{{ friend.user }}</h4>
+						<h5>{{ frined.city }}</h5>
+					</a>
+				</div>
+				{% empty %}
+					<p>No friends</p>
+				{% endfor %}
+			</div>
+
+	</div>
+	
+{% endblock %}

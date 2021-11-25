@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All profiles{% endblock %}
+
+{% block content %}
+	
+	<h3>All profiles:</h3>
+
+	{% for profile in profiles %}
+	<div style="display: inline-block; margin-right: 10px; text-align: center;">
+		<a href="{% url 'account:profile' profile.id %}">
+			{% if profile.photo %}
+				<img src="{{ profile.photo.url }}" width="70" height="100">
+			{% else %}
+				<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+			{% endif %} 
+			<h4>{{ profile.user }}</h4>
+		</a>
+		{% if request.user == profile.user %}
+			<p>You</p>
+		{% else %}
+			{% if profile in request.user.profile.friends.all %}
+				<p>Friends</p>
+			{% else %}
+				{% if profile == request.user.profile %}
+				{% else %}
+					<a href="{% url 'account:send' profile.id %}">Add to friends</a>
+				{% endif %}
+			{% endif %}
+			<br>
+			{% for req in requests %}
+				{% if req %}
+					{% if profile in req.to_profile.all %}
+	            		<a href="{% url 'events:cancel_event_invite' event.id profile.id %}">Cancel</a>
+	            	{% else %}
+			            <br>
+			            <a href="{% url 'events:invite_user_to_event' event.id profile.id %}">Invite to event</a>
+			        {% endif %}
+			    {% else %}
+			    	<a href="{% url 'events:invite_user_to_event' event.id profile.id %}">Invite to event</a>
+			    {% endif %}
+            	<br>
+            {% endfor %}
+		{% endif %}
+	</div>
+	{% empty %}
+		<p>No profiles yet</p>
+	{% endfor %}
+	
+{% endblock %}
