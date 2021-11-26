@@ -28,20 +28,22 @@
 					<a href="{% url 'account:send' profile.id %}">Add to friends</a>
 				{% endif %}
 			{% endif %}
-			<br>
-			{% for req in requests %}
-				{% if req %}
-					{% if profile in req.to_profile.all %}
-	            		<a href="{% url 'events:cancel_event_invite' event.id profile.id %}">Cancel</a>
-	            	{% else %}
-			            <br>
-			            <a href="{% url 'events:invite_user_to_event' event.id profile.id %}">Invite to event</a>
+			<br><br>
+			{% if profile in event.participators.all %}
+				Participator
+    		{% else %}
+    			<br>
+    			{% for req in profile.to_profile.all %}
+					{% if profile == req.to_profile %}
+			    		<a href="{% url 'events:cancel_event_invite' event.id profile.id %}">Cancel</a>
+			    	{% else %}
+			    		<a href="{% url 'events:invite_profile_redirect' event.id profile.id %}">Invite to event</a>
 			        {% endif %}
-			    {% else %}
-			    	<a href="{% url 'events:invite_user_to_event' event.id profile.id %}">Invite to event</a>
-			    {% endif %}
-            	<br>
-            {% endfor %}
+				{% empty %}
+					<a href="{% url 'events:invite_profile_redirect' event.id profile.id %}">Invite to event</a>
+			    {% endfor %}
+	            <br>
+            {% endif %}
 		{% endif %}
 	</div>
 	{% empty %}

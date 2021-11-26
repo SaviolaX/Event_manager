@@ -4,6 +4,7 @@ from .account_logic import *
 from .account_registration_and_edit_logic import *
 
 
+@login_required
 def all_profiles(request):
     """Get list of all profiles"""
     return get_all_profiles_list(request)
@@ -15,6 +16,7 @@ def user_profile(request, id):
     return get_user_profile_page(request, id)
 
 
+@login_required
 def edit_profile(request, id):
     """Edit current profile"""
     return edit_current_profile_account(request, id)
@@ -26,6 +28,7 @@ def user_friends_list(request, id):
     return get_profiles_friends_list(request, id)
 
 
+@login_required
 def my_events(request):
     """Get all current profile's events"""
     return get_all_my_events(request)
@@ -55,6 +58,7 @@ def cancel_friend_request(request, id):
     return decline_request(request, id)
 
 
+@login_required
 def cancel_sending_friend_request(request, id):
     """Cancel friend request"""
     return cancel_request(request, id)

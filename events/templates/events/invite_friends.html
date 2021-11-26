@@ -1,23 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ profile.user }}'s friend list{% endblock %}
+{% block title %}{{ request.user }}'s friend list{% endblock %}
 
 {% block content %}
 	
 	<h3>Friends: </h3>
 	{% for friend in friends %}
-	<br><br>
-	<a href="{% url 'account:profile' friend.id %}">
-		{% if friend.photo %}
-			<img src="{{ friend.photo.url }}" width="70" height="100">
-		{% else %}
-			<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
-		{% endif %} 
-		<h4>{{ friend.user }}</h4>
-	</a>
-	<p>Добавить if если запрос уже существует</p>
-	<a href="{% url 'events:invite_user_to_event' event.id friend.id %}">Invite to event</a>
+		<br><br>
+		<a href="{% url 'account:profile' friend.id %}">
+			{% if friend.photo %}
+				<img src="{{ friend.photo.url }}" width="70" height="100">
+			{% else %}
+				<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+			{% endif %} 
+			<h4>{{ friend.user }}</h4>
+		</a>
+		{% for req in friend.to_profile.all %}
+			{% if friend == req.to_profile %}
+	    		<a href="{% url 'events:cancel_event_invite_from_friend' event.id friend.id %}">Cancel</a>
+	    	{% else %}
+	    		<a href="{% url 'events:invite_friends_redirect' event.id friend.id %}">Invite to event</a>
+	        {% endif %}
+		{% empty %}
+			<a href="{% url 'events:invite_friends_redirect' event.id friend.id %}">Invite to event</a>
+	    {% endfor %}
 	{% empty %}
 		<p>No friends</p>
 	{% endfor %}

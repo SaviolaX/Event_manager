@@ -46,6 +46,7 @@ def get_list_of_all_friends(request, event_id):
     """Get list of all friends"""
     event = Event.objects.get(id=event_id)
     friends = get_profile_all_friends(request)
+    requests = EventInviteRequest.objects.filter(from_event=event)
 
-    context = {'friends': friends, 'event': event}
+    context = {'friends': friends, 'event': event, 'requests': requests}
     return render(request, 'events/invite_friends.html', context)
