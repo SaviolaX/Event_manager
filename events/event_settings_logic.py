@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 
 from .models import Event
-from account.models import Profile
+from accounts.models import Profile
 from . forms import CreateEventForm
 
 
@@ -44,4 +44,4 @@ def delete_current_event(request, id):
     """Delete event"""
     event = Event.objects.get(id=id)
     event.delete()
-    return redirect('account:my_events')
+    return redirect('accounts:my_events')

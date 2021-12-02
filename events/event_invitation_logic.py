@@ -1,8 +1,8 @@
 from django.shortcuts import redirect
 
 from .models import Event, EventInviteRequest
-from account.models import Profile
-from account.account_logic import *
+from accounts.models import Profile
+from accounts.account_logic import *
 
 
 def kick_participator_from_event(request, id, profile_id):
@@ -58,4 +58,4 @@ def decline_invitation(request, id):
     e_request = get_event_invite_request(request, id=id)
     if e_request.to_profile == request.user.profile:
         e_request.delete()
-        return redirect('account:profile', e_request.to_profile.id)
+        return redirect('accounts:profile', e_request.to_profile.id)

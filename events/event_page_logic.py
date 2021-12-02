@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 from .models import Event, JoinEventRequest
-from account.models import Profile
-from account.account_logic import *
+from accounts.models import Profile
+from accounts.account_logic import *
 
 
 def get_event_by_id(request, id):

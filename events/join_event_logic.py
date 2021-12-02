@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 
 from .models import Event, JoinEventRequest
-from account.models import Profile
+from accounts.models import Profile
 
 
 def instantly_join_event_without_requests(request, id):

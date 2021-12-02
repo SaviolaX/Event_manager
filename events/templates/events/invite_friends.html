@@ -8,7 +8,7 @@
 	<h3>Friends: </h3>
 	{% for friend in friends %}
 		<br><br>
-		<a href="{% url 'account:profile' friend.id %}">
+		<a href="{% url 'accounts:profile' friend.id %}">
 			{% if friend.photo %}
 				<img src="{{ friend.photo.url }}" width="70" height="100">
 			{% else %}

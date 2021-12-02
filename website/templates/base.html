@@ -15,18 +15,18 @@
 			<ul class="navbar-menu">
 				<li><a href="{% url 'website:main_page' %}">Home</a></li>
 				{% if request.user.is_authenticated %}
-					<li><a href="{% url 'account:profile' user.profile.id %}">Profile</a></li>
+					<li><a href="{% url 'accounts:profile' user.profile.id %}">Profile</a></li>
 					<li><a href="{% url 'events:all_events' %}">All Events</a></li>
-					<li><a href="{% url 'account:all_profiles' %}">All Profiles</a></li>
+					<li><a href="{% url 'accounts:all_profiles' %}">All Profiles</a></li>
 				{% endif %}
 			</ul>
 			<ul class="navbar-auth">
 				{% if request.user.is_authenticated %}
-						<li><a href="{% url 'account:profile' user.profile.id %}">{{ request.user.profile }}</a></li>
-						<li><a href="{% url 'account:logout' %}">Logout</a></li>
+						<li><a href="{% url 'accounts:profile' user.profile.id %}">{{ request.user.profile }}</a></li>
+						<li><a href="{% url 'accounts:logout' %}">Logout</a></li>
 				{% else %}
-					<li><a href="{% url 'account:login' %}">Login</a></li>
-					<li><a href="{% url 'account:register' %}">Registration</a></li>
+					<li><a href="{% url 'accounts:login' %}">Login</a></li>
+					<li><a href="{% url 'accounts:register' %}">Registration</a></li>
 				{% endif %}
 			</ul>
 		</div>

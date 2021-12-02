@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user }}'s friend list{% endblock %}
+
+{% block content %}
+
+	<h3>Requests:</h3>
+	{% for f_request in recieved_request %}
+		<br><br>
+		<a href="{% url 'accounts:profile' f_request.from_user.id %}">
+			{% if f_request.from_user.photo %}
+				<img src="{{ f_request.from_user.photo.url }}" width="70" height="100">
+			{% else %}
+				<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+			{% endif %} 
+			<h4>{{ f_request.from_user }}</h4>
+		</a>
+		<small>{{ f_request.timestamp }}</small>
+		<br>
+		<a href="{% url 'accounts:accept' f_request.id %}">Accept</a>
+		<a href="{% url 'accounts:cancel' f_request.id %}">Decline</a>
+	{% empty %}
+		<p>No requests</p>
+	{% endfor %}
+
+	<h3>Friends: <span style="font-weight: 700;">{{ profile.get_sum_friends }}</span></h3>
+	{% for friend in friends %}
+		<br><br>
+		<a href="{% url 'accounts:profile' friend.id %}">
+			{% if friend.photo %}
+				<img src="{{ friend.photo.url }}" width="70" height="100">
+			{% else %}
+				<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+			{% endif %}
+			<h4>{{ friend.user }}</h4>
+		</a>
+		<a href="{% url 'accounts:delete' friend.id %}">Delete</a>
+	{% empty %}
+		<p>No friends</p>
+	{% endfor %}
+
+	
+
+{% endblock %}

@@ -1,21 +1,27 @@
 from django.db import models
 
-from account.models import Profile
+from accounts.models import Profile
 
 
 class Event(models.Model):
     """Create event"""
-    title = models.CharField(max_length=200, blank=False,
-                             null=False, verbose_name='event title')
-    creator = models.ForeignKey(Profile, on_delete=models.CASCADE,
+    title = models.CharField(max_length=200,
+                             blank=False,
+                             null=False,
+                             verbose_name='event title')
+    creator = models.ForeignKey(Profile,
+                                on_delete=models.CASCADE,
                                 related_name='creator',
                                 verbose_name='event creator')
-    participators = models.ManyToManyField(Profile, blank=True,
+    participators = models.ManyToManyField(Profile,
+                                           blank=True,
                                            verbose_name='event participators')
     description = models.TextField(blank=True,
                                    verbose_name='event description')
-    start = models.CharField(max_length=5, verbose_name='time event starts')
-    finish = models.CharField(max_length=5, verbose_name='time event finish')
+    start = models.CharField(max_length=5,
+                             verbose_name='time event starts')
+    finish = models.CharField(max_length=5,
+                              verbose_name='time event finish')
     event_date = models.CharField(max_length=50)
     timestamp = models.DateTimeField(auto_now_add=True)
     privat_event = models.BooleanField(default=False)
@@ -53,9 +59,11 @@ class EventInviteRequest(models.Model):
 
 class JoinEventRequest(models.Model):
     """Request profile sends to event"""
-    to_event = models.ForeignKey(Event, on_delete=models.CASCADE,
+    to_event = models.ForeignKey(Event,
+                                 on_delete=models.CASCADE,
                                  related_name='to_event', null=True)
-    from_profile = models.ForeignKey(Profile, on_delete=models.CASCADE,
+    from_profile = models.ForeignKey(Profile,
+                                     on_delete=models.CASCADE,
                                      related_name='from_profile', null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
