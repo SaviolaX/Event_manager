@@ -9,15 +9,15 @@ class EventParticipatorsSerializer(serializers.ModelSerializer):
         fields = ('participators',)
 
 
+class JoinEventRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JoinEventRequest
+        fields = '__all__'
+
+
 class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
         fields = ('id', 'title', 'event_date', 'start', 'finish',
                   'timestamp', 'creator', 'privat_event', 'participators')
-
-
-class JoinEventRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JoinEventRequest
-        fields = '__all__'

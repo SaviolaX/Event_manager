@@ -14,9 +14,9 @@ urlpatterns = [
     path('profiles/', views.all_profiles, name='all_profiles'),
     path('profile/<int:id>/', views.user_profile, name='profile'),
     path('edit_profile/<int:id>/', views.edit_profile, name='edit_profile'),
-    path('<int:id>/friends_list/', views.user_friends_list,
+    path('profile/<int:id>/friends_list/', views.user_friends_list,
          name='friends_list'),
-    path('my_events/', views.my_events, name='my_events'),
+    path('profile/my_events/', views.my_events, name='my_events'),
 
 
     # Request controllers

@@ -42,12 +42,13 @@ urlpatterns = [
          name='cancel_event_invite_from_friend'),
 
     # For joining event
-    path('request_to_join_event/<str:event_id>/', views.request_join_event,
-         name='join_event_request'),
     path('accept_join_event/<int:id>/', views.accept_join_event_request,
          name='accept_join_event_request'),
     path('decline_join_event/<int:id>/', views.decline_join_event_request,
          name='decline_join_event_request'),
+
+    path('request_to_join_event/<str:event_id>/', views.request_join_event,
+         name='join_event_request'),
     path('cancel_join_event_request/<int:id>/', views.cancel_join_request,
          name='cancel_join_event_request'),
 ]

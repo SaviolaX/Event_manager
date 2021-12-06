@@ -8,7 +8,7 @@ from events.models import EventInviteRequest
 class UserViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name')
+        fields = ('id', 'username', 'first_name', 'last_name')
 
 
 class EventInviteRequestSerializer(serializers.ModelSerializer):
@@ -20,10 +20,11 @@ class EventInviteRequestSerializer(serializers.ModelSerializer):
 class FriendRequestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
-        fields = ('from_user', 'to_user', 'timestamp',)
+        fields = ('id', 'from_user', 'to_user', 'timestamp',)
 
 
 class ProfileFriendsSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
         fields = ('friends',)

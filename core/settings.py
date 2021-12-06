@@ -132,3 +132,13 @@ LOGIN_REDIRECT_URL = 'website:main_page'
 LOGIN_URL = 'accounts:login'
 LOGOUT_REDIRECT_URL = 'website:main_page'
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}

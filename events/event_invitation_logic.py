@@ -55,7 +55,7 @@ def accept_invitation(request, id):
 
 def decline_invitation(request, id):
     """User decline a request and request is deleted"""
-    e_request = get_event_invite_request(request, id=id)
+    e_request = EventInviteRequest.objects.get(id=id)
     if e_request.to_profile == request.user.profile:
         e_request.delete()
         return redirect('accounts:profile', e_request.to_profile.id)
