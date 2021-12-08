@@ -1,15 +1,19 @@
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import (SessionAuthentication,
                                            BasicAuthentication)
 from rest_framework.permissions import IsAuthenticated
 
-from ..models import Event, JoinEventRequest, EventInviteRequest
-from accounts.models import Profile
+from ..models import Event, JoinEventRequest
 from .serializers import (EventSerializer,
                           JoinEventRequestSerializer,
                           EventParticipatorsSerializer)
+from .logic import (get_event_page, delete_event, cancel_join_event_request,
+                    create_join_event_request, decline_join_event_request,
+                    accept_join_event_request, kick_event_participator,
+                    create_event_intite_to_user, cancel_event_invite_request,
+                    leave_event)
 
 
 class LeaveEvent(APIView):
@@ -18,15 +22,7 @@ class LeaveEvent(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
-        profile = Profile.objects.get(user=request.user)
-        event = Event.objects.get(id=id)
-        if profile in event.participators.all():
-            event.participators.remove(profile)
-            return Response('You left event successfully',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You are not participator',
-                            status=status.HTTP_403_FORBIDDEN)
+        return leave_event(request, id)
 
 
 class CancelEventInvitationToUser(APIView):
@@ -35,17 +31,7 @@ class CancelEventInvitationToUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id, profile_id):
-        profile = Profile.objects.get(id=profile_id)
-        event = Event.objects.get(id=event_id)
-        if request.user == event.creator.user:
-            event_invite = EventInviteRequest.objects.get(
-                from_event=event, to_profile=profile)
-            event_invite.delete()
-            return Response('Invitation was canceled successfully',
-                            status=status.HTTP_201_CREATED)
-        else:
-            return Response('Only event creator can cancel invites',
-                            status=status.HTTP_403_FORBIDDEN)
+        return cancel_event_invite_request(request, event_id, profile_id)
 
 
 class EventInvitationToUser(APIView):
@@ -54,16 +40,7 @@ class EventInvitationToUser(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id, profile_id):
-        profile = Profile.objects.get(id=profile_id)
-        event = Event.objects.get(id=event_id)
-        if request.user == event.creator.user:
-            event_invite, created = EventInviteRequest.objects.get_or_create(
-                from_event=event, to_profile=profile)
-            return Response('Invitation was sent successfully',
-                            status=status.HTTP_201_CREATED)
-        else:
-            return Response('Only event creator can send invites',
-                            status=status.HTTP_403_FORBIDDEN)
+        return create_event_intite_to_user(request, event_id, profile_id)
 
 
 class KickEventParticipator(APIView):
@@ -72,15 +49,7 @@ class KickEventParticipator(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id, profile_id):
-        profile = Profile.objects.get(id=profile_id)
-        event = Event.objects.get(id=event_id)
-        if request.user.profile == event.creator:
-            event.participators.remove(profile)
-            return Response('User was removed from event participators',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('Forbidden, you are not creator',
-                            status=status.HTTP_403_FORBIDDEN)
+        return kick_event_participator(request, event_id, profile_id)
 
 
 class AcceptJoinEventRequest(APIView):
@@ -89,17 +58,7 @@ class AcceptJoinEventRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id, req_id):
-        event = Event.objects.get(id=event_id)
-        join_event_request = JoinEventRequest.objects.get(id=req_id)
-        if join_event_request.to_event.creator == request.user.profile:
-            join_event_request.to_event.participators.add(
-                join_event_request.from_profile)
-            join_event_request.delete()
-            return Response('User added to event participators',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not do it, you are not event creator',
-                            status=status.HTTP_403_FORBIDDEN)
+        return accept_join_event_request(request, event_id, req_id)
 
 
 class DeclineJoinEventRequest(APIView):
@@ -108,33 +67,16 @@ class DeclineJoinEventRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id, req_id):
-        event = Event.objects.get(id=event_id)
-        join_event_request = JoinEventRequest.objects.get(id=req_id)
-        if join_event_request.to_event.creator == request.user.profile:
-            join_event_request.delete()
-            return Response('User added to event participators',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not do it, you are not event creator',
-                            status=status.HTTP_403_FORBIDDEN)
+        return decline_join_event_request(request, event_id, req_id)
 
 
-class JoinEventRequestView(APIView):
+class CreateJoinEventRequest(APIView):
     """Create join event request"""
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request, event_id):
-        profile = Profile.objects.get(user=request.user)
-        event = Event.objects.get(id=event_id)
-        if profile in event.participators.all():
-            return Response("You are participator already",
-                            status=status.HTTP_403_FORBIDDEN)
-        else:
-            join_event_request, created = JoinEventRequest.objects.get_or_create(
-                from_profile=profile, to_event=event)
-            return Response('Join event request was sent',
-                            status=status.HTTP_200_OK)
+        return create_join_event_request(request, event_id)
 
 
 class CancelJoinEvenRequest(APIView):
@@ -143,17 +85,7 @@ class CancelJoinEvenRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None):
-        profile = Profile.objects.get(user=request.user)
-        event = Event.objects.get(id=id)
-        join_event_request = JoinEventRequest.objects.get(
-            from_profile=profile, to_event=event)
-        if join_event_request:
-            join_event_request.delete()
-            return Response('Your request was canceled',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('Join event request does not exist',
-                            status=status.HTTP_400_BAD_REQUEST)
+        return cancel_join_event_request(request, id)
 
 
 class EventList(generics.ListAPIView):
@@ -175,23 +107,13 @@ class EventView(generics.RetrieveDestroyAPIView):
     def get(self, request, id=None):
         """get event"""
         try:
-            event = Event.objects.get(id=id)
-            serializer = self.serializer_class(event)
-            return Response(serializer.data)
+            return get_event_page(request, id)
         except Event.DoesNotExist:
             return Response('Wrong event, probably event does not exist')
 
     def delete(self, request, id=None):
         """delete event"""
-        profile = Profile.objects.get(user=self.request.user)
-        event = Event.objects.get(id=id)
-        if event.creator == profile:
-            event.delete()
-        else:
-            return Response('You are not creator and can not delete the event',
-                            status=status.HTTP_403_FORBIDDEN)
-        return Response('Event was deleted successfully',
-                        status=status.HTTP_200_OK)
+        return delete_event(request, id)
 
 
 class EventParticipators(generics.ListAPIView):

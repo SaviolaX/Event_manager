@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (EventList, CreateEvent, UpdateEvent,
                     EventView, JoinRequest, EventParticipators,
-                    JoinEventRequestView, CancelJoinEvenRequest,
+                    CreateJoinEventRequest, CancelJoinEvenRequest,
                     AcceptJoinEventRequest, DeclineJoinEventRequest,
                     KickEventParticipator, EventInvitationToUser,
                     CancelEventInvitationToUser, LeaveEvent)
@@ -28,7 +28,7 @@ urlpatterns = [
 
     # Join event requests from user
     path('event/<int:event_id>/create_join_event_request/',
-         JoinEventRequestView.as_view(), name='join_event_request'),
+         CreateJoinEventRequest.as_view(), name='join_event_request'),
     path('event/<int:id>/cancel_join_event_request/',
          CancelJoinEvenRequest.as_view(), name='cancel_event_request'),
 

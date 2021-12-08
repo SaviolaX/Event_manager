@@ -1,11 +1,15 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
-from rest_framework.response import Response
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.authentication import (SessionAuthentication,
                                            BasicAuthentication)
 from rest_framework.permissions import IsAuthenticated
 
+from .logic import (get_profile_page, edit_profile_page, register_user,
+                    get_profile_event_list, delete_friend,
+                    create_friend_request, accept_friend_request,
+                    decline_friend_request, cancel_friend_request,
+                    get_all_profile_friends, accept_event_invite_request,
+                    decline_event_invite_request)
 from ..models import Profile, FriendRequest
 from events.models import EventInviteRequest, Event
 from events.api.serializers import EventSerializer
@@ -20,15 +24,7 @@ class DeclineEventInviteRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, profile_id, req_id):
-        profile = Profile.objects.get(id=profile_id)
-        e_request = EventInviteRequest.objects.get(id=req_id)
-        if e_request.to_profile == request.user.profile:
-            e_request.delete()
-            return Response('Event invitation was canceled successfully',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not cancel invitation, it is not yours',
-                            status=status.HTTP_403_FORBIDDEN)
+        return decline_event_invite_request(request, profile_id, req_id)
 
 
 class AcceptEventInviteRequest(APIView):
@@ -37,17 +33,7 @@ class AcceptEventInviteRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, profile_id, req_id):
-        profile = Profile.objects.get(id=profile_id)
-        e_request = EventInviteRequest.objects.get(id=req_id)
-        if e_request.to_profile == request.user.profile:
-            e_request.from_event.participators.add(e_request.to_profile)
-            e_request.delete()
-            return Response('Event invitation was accepted successfully',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response(
-                'Invitation was sent not for you, you can not accept it',
-                status=status.HTTP_403_FORBIDDEN)
+        return accept_event_invite_request(request, profile_id, req_id)
 
 
 class ProfileFriends(generics.ListAPIView):
@@ -59,10 +45,7 @@ class ProfileFriends(generics.ListAPIView):
     lookup_field = 'id'
 
     def get(self, request, id=None):
-        profile = Profile.objects.get(id=id)
-        friends = profile.friends.all()
-        serializer = ProfileSerializer(friends, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return get_all_profile_friends(request, id)
 
 
 class FriendRequestList(generics.ListAPIView):
@@ -83,16 +66,7 @@ class CancelFriendRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None):
-        profile = Profile.objects.get(id=id)
-        sent_requests = FriendRequest.objects.filter(
-            from_user=request.user.profile, to_user=profile).first()
-        if sent_requests.from_user == request.user.profile:
-            sent_requests.delete()
-            return Response('Your friend request was canceled',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not cancel not your request',
-                            status=status.HTTP_403_FORBIDDEN)
+        return cancel_friend_request(request, id)
 
 
 class DeclineFriendRequest(APIView):
@@ -101,19 +75,7 @@ class DeclineFriendRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, req_id, profile_id):
-        profile = Profile.objects.get(id=profile_id)
-        f_request = FriendRequest.objects.get(id=req_id)
-        if f_request.to_user == request.user.profile:
-            f_request.delete()
-            return Response('Friend request canceled',
-                            status=status.HTTP_200_OK)
-        elif f_request.from_user == request.user.profile:
-            f_request.delete()
-            return Response('Friend request canceled',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not decline not your request',
-                            status=status.HTTP_403_FORBIDDEN)
+        return decline_friend_request(request, req_id, profile_id)
 
 
 class AcceptFriendRequest(APIView):
@@ -122,17 +84,7 @@ class AcceptFriendRequest(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, req_id, profile_id):
-        profile = Profile.objects.get(id=profile_id)
-        f_request = FriendRequest.objects.get(id=req_id)
-        if f_request.to_user == request.user.profile:
-            f_request.to_user.friends.add(f_request.from_user)
-            f_request.from_user.friends.add(f_request.to_user)
-            f_request.delete()
-            return Response('Friend request accepted',
-                            status=status.HTTP_200_OK)
-        else:
-            return Response('You can not accept not your request',
-                            status=status.HTTP_403_FORBIDDEN)
+        return accept_friend_request(request, req_id, profile_id)
 
 
 class CreateFriendRequestView(APIView):
@@ -141,15 +93,7 @@ class CreateFriendRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id=None):
-        try:
-            to_user = get_object_or_404(Profile, id=id)
-            profile = Profile.objects.get(user=request.user)
-            f_request, created = FriendRequest.objects.get_or_create(
-                from_user=profile,
-                to_user=to_user)
-            return Response({'create friend request': True})
-        except FriendRequest.DoesNotExist:
-            return Response({'Something happened with function': True})
+        return create_friend_request(request, id)
 
 
 class DeleteFriend(APIView):
@@ -158,11 +102,7 @@ class DeleteFriend(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, profile_id, friend_id, format=None):
-        profile = Profile.objects.get(id=profile_id)
-        friend = profile.friends.get(id=friend_id)
-        profile.friends.remove(friend)
-        friend.friends.remove(profile)
-        return Response({'delete friend': True})
+        return delete_friend(request, profile_id, friend_id)
 
 
 class ProfileEventsList(generics.RetrieveAPIView):
@@ -174,10 +114,7 @@ class ProfileEventsList(generics.RetrieveAPIView):
     lookup_field = 'id'
 
     def get(self, request, id=None):
-        profile = Profile.objects.get(id=id)
-        events = Event.objects.all().filter(creator=profile)
-        serializer = EventSerializer(events, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return get_profile_event_list(request, id)
 
 
 class EventInvitations(generics.ListAPIView):
@@ -210,29 +147,11 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get(self, request, id=None):
         """Get profile page"""
-        try:
-            profile = Profile.objects.get(id=id)
-            serializer = ProfileSerializer(profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Profile.DoesNotExist:
-            return Response('Profile does not exist, wrong address',
-                            status=status.HTTP_403_FORBIDDEN)
+        return get_profile_page(request, id)
 
     def update(self, request, id=None):
         """If profile belong to current user, profile can be edited"""
-        profile = Profile.objects.get(id=id)
-        if request.user.profile == profile:
-            serializer = ProfileSerializer(instance=profile, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-            else:
-                return Response('Something went wrong',
-                                status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response('You cant not edit profile',
-                            status=status.HTTP_403_FORBIDDEN)
+        return edit_profile_page(request, id)
 
 
 class RegisterView(generics.GenericAPIView):
@@ -241,11 +160,4 @@ class RegisterView(generics.GenericAPIView):
 
     def post(self, request):
         """Create user"""
-        user = request.data
-        serializer = self.serializer_class(data=user)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        user_data = serializer.data
-
-        return Response(user_data, status=status.HTTP_201_CREATED)
+        return register_user(request)
