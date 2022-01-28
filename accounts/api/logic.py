@@ -133,7 +133,7 @@ def edit_profile_page(request, id):
             return Response('Something went wrong',
                             status=status.HTTP_400_BAD_REQUEST)
     else:
-        return Response('You cant not edit profile',
+        return Response('You can not edit profile',
                         status=status.HTTP_403_FORBIDDEN)
 
 

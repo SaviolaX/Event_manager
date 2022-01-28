@@ -34,10 +34,6 @@ class Event(models.Model):
                 Date: {self.event_date}. From:{self.start} to {self.finish}. \
                 Privat: {self.privat_event}"
 
-    def get_sum_participators(self):
-        """Count sum of all event participators"""
-        return self.participators.count()
-
 
 class EventInviteRequest(models.Model):
     """Request event sends to profile"""

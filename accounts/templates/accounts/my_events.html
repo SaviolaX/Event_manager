@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ profile }}'s events{% endblock %}
+{% block title %}{{ request.user.profile }}'s events{% endblock %}
 
 {% block content %}
 	<br>
@@ -9,12 +9,14 @@
 	<hr>
 
 	<h2>Event invitations:</h2>
-	{% for event_request in event_invites %}
-		<a href="{% url 'events:event_page' event_request.from_event.id %}"><p>{{ event_request.from_event }}</p></a>
-		<small>{{ event_request.from_event.description|slice:50 }}...</small>
-		<br>
-		<a href="{% url 'events:accept_event' event_request.id %}">Accept</a>
-		<a href="{% url 'events:decline_event' event_request.id %}">Decline</a>
+	{% for event_request in request.user.profile.to_profile.all %}
+		{% if request.user.profile == event_request.to_profile %}
+			<a href="{% url 'events:event_page' event_request.from_event.id %}"><p>{{ event_request.from_event }}</p></a>
+			<small>{{ event_request.from_event.description|slice:50 }}...</small>
+			<br>
+			<a href="{% url 'events:accept_event' event_request.id %}">Accept</a>
+			<a href="{% url 'events:decline_event' event_request.id %}">Decline</a>
+		{% endif %}
 	{% empty %}
 		<p>No invites</p>
 	{% endfor %}
@@ -22,25 +24,27 @@
 	<hr>
 
 	<h2>I take a part in events: </h2>
-	{% for event in take_part_events %}
-		{% if event.privat_event == True %}
-			<h4 style="color: orange;">Private</h4>
-		{% else %}
-			<h4 style="color: green;">Open</h4>
-		{% endif %}
-		<small>{{ event.timestamp }}</small>
-		<a href="{% url 'events:event_page' event.id %}"><h3>{{ event.title }}</h3></a><span>From: {{ event.start }} To: {{ event.finish }}</span>
-		<p>Date: {{ event.event_date }}</p>
-		<h4>Creator: {{ event.creator }}</h4>
-		{% if event.description %}
-			<h5>{{ event.description }}</h5>
-		{% else %}
-			<h5>No decription</h5>
-		{% endif %}
-		{% if event.get_sum_participators == 0 %}
-			<p>No participators</p>
-		{% else %}
-			<p>Participators: {{ event.get_sum_participators }}</p>
+	{% for event in events %}
+		{% if request.user.profile == event.creator %}
+			{% if event.privat_event == True %}
+				<h4 style="color: orange;">Private</h4>
+			{% else %}
+				<h4 style="color: green;">Open</h4>
+			{% endif %}
+			<small>{{ event.timestamp }}</small>
+			<a href="{% url 'events:event_page' event.id %}"><h3>{{ event.title }}</h3></a><span>From: {{ event.start }} To: {{ event.finish }}</span>
+			<p>Date: {{ event.event_date }}</p>
+			<h4>Creator: {{ event.creator }}</h4>
+			{% if event.description %}
+				<h5>{{ event.description }}</h5>
+			{% else %}
+				<h5>No decription</h5>
+			{% endif %}
+			{% if event.participators.count == 0 %}
+				<p>No participators</p>
+			{% else %}
+				<p>Participators: {{ event.participators.count }}</p>
+			{% endif %}
 		{% endif %}
 	{% empty %}
 		<p>No events you take a part</p>
@@ -50,7 +54,7 @@
 
 	<h2>My event</h2>
 
-	{% for event in events %}
+	{% for event in request.user.profile.creator.all %}
 		{% if event.privat_event == True %}
 			<h4 style="color: orange;">Private</h4>
 		{% else %}
@@ -65,10 +69,10 @@
 		{% else %}
 			<h5>No decription</h5>
 		{% endif %}
-		{% if event.get_sum_participators == 0 %}
+		{% if event.participators.count == 0 %}
 			<p>No participators</p>
 		{% else %}
-			<p>Participators: {{ event.get_sum_participators }}</p>
+			<p>Participators: {{ event.participators.count }}</p>
 		{% endif %}
 		<br>
 		<div class="event-buttons">

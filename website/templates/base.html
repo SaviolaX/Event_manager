@@ -5,7 +5,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{% block title %}{% endblock %}</title>
+	<title>{% block title %}Events_app{% endblock %}</title>
 
 	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 </head>
@@ -16,6 +16,7 @@
 				<li><a href="{% url 'website:main_page' %}">Home</a></li>
 				{% if request.user.is_authenticated %}
 					<li><a href="{% url 'accounts:profile' user.profile.id %}">Profile</a></li>
+					<li><a href="{% url 'activity:events_creations' %}">Activities</a></li>
 					<li><a href="{% url 'events:all_events' %}">All Events</a></li>
 					<li><a href="{% url 'accounts:all_profiles' %}">All Profiles</a></li>
 				{% endif %}

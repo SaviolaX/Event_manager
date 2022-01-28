@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .models import Event
 from accounts.models import Profile
 from . forms import CreateEventForm
+from activity.models import EventCreationActivity
 
 
 def create_event_and_assign_to_current_user(request):
@@ -16,6 +17,11 @@ def create_event_and_assign_to_current_user(request):
             event = form.save(commit=False)
             event.creator = profile
             event.save()
+
+            EventCreationActivity.objects.create(
+                user=profile,
+                event=event)
+
             return redirect('events:all_events')
     else:
         form = CreateEventForm()

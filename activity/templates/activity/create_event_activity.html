@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All activities{% endblock %}
+
+{% block content %}
+	
+	<h3>Activities</h3>
+
+	{% for activity in activities %}
+
+		<div>
+			<li>
+				<a href="{% url 'accounts:profile' activity.user.id %}">{{ activity.user }}</a> 
+				created 
+				"<a href="{% url 'events:event_page' activity.event.id %}">{{ activity.event }}</a>"
+				<span>{{ activity.created }}</span>
+			</li>
+		</div>
+		
+	{% empty %}
+		<p>No activities yet</p>
+	{% endfor %}
+
+{% endblock %}

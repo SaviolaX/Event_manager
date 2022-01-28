@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 
 from .models import Profile, FriendRequest
-from events.models import EventInviteRequest, Event
+from events.models import Event
 
 
 def get_all_profiles_list(request):
     """Gets all profiles from database"""
-    profiles = Profile.objects.all()
+    profiles = Profile.objects.all().select_related(
+        'user').prefetch_related('friends')
 
     context = {'profiles': profiles}
     return render(request, 'accounts/all_profiles.html', context)
@@ -14,7 +15,7 @@ def get_all_profiles_list(request):
 
 def get_profile_all_friends(request):
     """Gets all friends of current user profile"""
-    profile = Profile.objects.get(user=request.user)
+    profile = Profile.objects.select_related('user').get(user=request.user)
     friends = profile.friends.all()
     return friends
 
@@ -23,23 +24,20 @@ def get_user_profile_page(request, id):
     """Gets profile and it's friends,
     also get friend request to this profile
     """
-    profile = Profile.objects.get(id=id)
-    friends = profile.friends.all()
-    friend_invite = FriendRequest.objects.filter(to_user=profile).first()
+    profile = Profile.objects.prefetch_related(
+        'friends').select_related('user').get(id=id)
+    friend_invite = FriendRequest.objects.filter(to_user=profile)
 
-    context = {'profile': profile, 'friends': friends,
-               'friend_invite': friend_invite}
+    context = {'profile': profile, 'friend_invite': friend_invite}
     return render(request, 'accounts/profile.html', context)
 
 
 def get_profiles_friends_list(request, id):
     """Gets profile's friends list and show all friend requests"""
-    profile = Profile.objects.get(id=id)
-    friends = profile.friends.all()
+    profile = Profile.objects.select_related('user').get(id=id)
     recieved_request = FriendRequest.objects.filter(to_user=profile)
 
     context = {'profile': profile,
-               'friends': friends,
                'recieved_request': recieved_request}
     return render(request, 'accounts/friends_list.html', context)
 
@@ -50,14 +48,10 @@ def get_all_my_events(request):
         Gets all events current user takes part in.
         Gets all invites sent by events to take a part in ones.
     """
-    profile = Profile.objects.get(user=request.user)
-    events = Event.objects.all().filter(creator=profile)
-    take_part_events = Event.objects.all().filter(participators=profile)
-    event_invites = EventInviteRequest.objects.filter(to_profile=profile)
+    events = Event.objects.select_related(
+        'creator__user').prefetch_related('participators')
 
-    context = {'events': events, 'profile': profile,
-               'event_invites': event_invites,
-               'take_part_events': take_part_events}
+    context = {'events': events}
     return render(request, 'accounts/my_events.html', context)
 
 

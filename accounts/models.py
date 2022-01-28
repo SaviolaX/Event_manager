@@ -16,10 +16,6 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
-    def get_sum_friends(self):
-        """Count all friends in friend list"""
-        return self.friends.count()
-
     def get_sum_created_events(self):
         """Count all events created by profile"""
         return self.creator.count()

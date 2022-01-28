@@ -22,10 +22,10 @@
 		{% else %}
 			<h5>No decription</h5>
 		{% endif %}
-		{% if event.get_sum_participators == 0 %}
+		{% if event.participators.count == 0 %}
 			<p>No participators</p>
 		{% else %}
-			<h4>Participators: {{ event.get_sum_participators }}</h4>
+			<h4>Participators: {{ event.participators.count }}</h4>
 			{% for participator in event.participators.all %}
 				<p>{{ participator }}</p>
 			{% endfor %}
@@ -61,16 +61,22 @@
 			<div class="event-join-requests">
 				<h3>Join requests: </h3>
 				{% for join_request in join_event_requests %}
-				<div class="join-event-request">
-					{% if join_request.from_profile.photo %}
-						<img src="{{ join_request.from_profile.photo.url }}" width="70" height="100">
-					{% else %}
-						<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
-					{% endif %} 
-					<p>{{ join_request.from_profile }}</p>
-					<a href="{% url 'events:accept_join_event_request' join_request.id %}">Accept</a>
-					<a href="{% url 'events:decline_join_event_request' join_request.id %}">Decline</a>
-				</div>
+					{% if join_request.to_event == event %}
+						{% if join_request.from_profile != event.creator %}
+						<div class="join-event-request">
+							{% if join_request.from_profile.photo %}
+								<img src="{{ join_request.from_profile.photo.url }}" width="70" height="100">
+							{% else %}
+								<img src="{% static 'images/no_img/no_img.png' %}" width="70" height="100">
+							{% endif %} 
+
+							<p>{{ join_request.from_profile }}</p>
+							<a href="{% url 'events:accept_join_event_request' join_request.id %}">Accept</a>
+							<a href="{% url 'events:decline_join_event_request' join_request.id %}">Decline</a>
+						</div>
+						{% endif %}
+					{% endif %}
+						
 				{% empty %}
 					<p>No requests</p>
 				{% endfor %}

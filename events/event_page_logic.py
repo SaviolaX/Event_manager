@@ -21,24 +21,21 @@ def get_all_open_events(request):
 
 def get_event_page(request, id):
     """Get event page"""
-    profile = Profile.objects.get(user=request.user)
-    event = Event.objects.get(id=id)
-    join_event_requests = JoinEventRequest.objects.all().filter(to_event=event)
-    join_event_request = JoinEventRequest.objects.filter(
-        from_profile=profile).first()
+    event = Event.objects.select_related('creator').prefetch_related(
+        'participators').get(id=id)
+    join_event_requests = JoinEventRequest.objects.select_related(
+        'to_event', 'from_profile__user')
 
-    context = {'event': event, 'join_event_requests': join_event_requests,
-               'join_event_request': join_event_request, 'profile': profile}
+    context = {'event': event, 'join_event_requests': join_event_requests}
     return render(request, 'events/event_page.html', context)
 
 
 def get_list_of_all_users(request, event_id):
     """Get list of all users"""
     event = Event.objects.get(id=event_id)
-    profiles = Profile.objects.all()
-    requests = EventInviteRequest.objects.filter(from_event=event)
+    profiles = Profile.objects.select_related('user').all()
 
-    context = {'profiles': profiles, 'event': event, 'requests': requests}
+    context = {'profiles': profiles, 'event': event}
     return render(request, 'events/invite_all_profiles_to_event.html', context)
 
 
@@ -46,7 +43,6 @@ def get_list_of_all_friends(request, event_id):
     """Get list of all friends"""
     event = Event.objects.get(id=event_id)
     friends = get_profile_all_friends(request)
-    requests = EventInviteRequest.objects.filter(from_event=event)
 
-    context = {'friends': friends, 'event': event, 'requests': requests}
+    context = {'friends': friends, 'event': event}
     return render(request, 'events/invite_friends.html', context)
